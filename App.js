@@ -6,8 +6,8 @@ import { Ionicons } from '@expo/vector-icons';
 
 // Import screens (Nanti kita buat filenya)
 import HomeScreen from './src/screens/HomeScreen';
-// import SearchScreen from './src/screens/SearchScreen';
-// import BookmarksScreen from './src/screens/BookmarksScreen';
+import SearchScreen from './src/screens/SearchScreen';
+import BookmarksScreen from './src/screens/BookmarksScreen';
 
 // Inisialisasi React Query [cite: 422]
 const queryClient = new QueryClient({
@@ -38,8 +38,8 @@ export default function App() {
         >
           {/* Nanti uncomment setelah file layarnya dibuat */}
           <Tab.Screen name="Home" component={HomeScreen} />
-          {/* <Tab.Screen name="Search" component={SearchScreen} /> */}
-          {/* <Tab.Screen name="Bookmarks" component={BookmarksScreen} /> */}
+          <Tab.Screen name="Search" component={SearchScreen} />
+          <Tab.Screen name="Bookmarks" component={BookmarksScreen} />
         </Tab.Navigator>
       </NavigationContainer>
     </QueryClientProvider>
