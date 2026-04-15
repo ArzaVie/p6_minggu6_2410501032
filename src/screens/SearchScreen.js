@@ -6,10 +6,16 @@ import { useNewsSearch } from '../hooks/useSearch';
 import { useBookmarks } from '../hooks/useBookmarks';
 import NewsCard from '../components/NewsCard';
 
+// 1. Import useTheme
+import { useTheme } from '../Context/ThemeContext'; // Pastikan path-nya sesuai (Context huruf besar/kecil)
+
 export default function SearchScreen() {
   const [query, setQuery] = useState('');
   const { data, isLoading, isError } = useNewsSearch(query);
   const { bookmarks, toggleBookmark } = useBookmarks();
+  
+  // 2. Panggil warnanya
+  const { colors, isDark } = useTheme();
 
   const renderItem = ({ item }) => (
     <NewsCard
@@ -21,26 +27,27 @@ export default function SearchScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Kotak Pencarian */}
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#94A3B8" style={styles.searchIcon} />
+    // 3. Background layar utama
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.searchContainer, { backgroundColor: colors.card }]}>
+        <Ionicons name="search" size={20} color={colors.textSecondary} style={styles.searchIcon} />
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { color: colors.text }]}
           placeholder="Cari berita... (min. 3 huruf)"
+          placeholderTextColor={colors.textSecondary}
           value={query}
           onChangeText={setQuery}
           clearButtonMode="while-editing"
+          keyboardAppearance={isDark ? "dark" : "light"}
         />
       </View>
 
-      {/* Menampilkan Status Loading/Error/Hasil */}
       {isLoading && query.length >= 3 ? (
-        <ActivityIndicator size="large" color="#089182" style={styles.centerElement} />
+        <ActivityIndicator size="large" color={colors.primary} style={styles.centerElement} />
       ) : isError ? (
-        <Text style={styles.centerElement}>Terjadi kesalahan saat mencari data.</Text>
+        <Text style={[styles.centerElement, { color: 'red' }]}>Terjadi kesalahan saat mencari data.</Text>
       ) : data?.articles?.length === 0 && query.length >= 3 ? (
-        <Text style={styles.centerElement}>Berita tidak ditemukan.</Text>
+        <Text style={[styles.centerElement, { color: colors.textSecondary }]}>Berita tidak ditemukan.</Text>
       ) : (
         <FlatList
           data={data?.articles || []}
@@ -54,11 +61,10 @@ export default function SearchScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  container: { flex: 1 },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
     margin: 16,
     borderRadius: 8,
     paddingHorizontal: 12,
@@ -70,5 +76,5 @@ const styles = StyleSheet.create({
   },
   searchIcon: { marginRight: 8 },
   searchInput: { flex: 1, height: 48, fontSize: 16 },
-  centerElement: { marginTop: 32, textAlign: 'center', color: '#64748B' },
+  centerElement: { marginTop: 32, textAlign: 'center' },
 });

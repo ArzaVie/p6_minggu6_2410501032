@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 
 // Import screens (Nanti kita buat filenya)
+import { ThemeProvider } from './src/Context/ThemeContext'; // Import ThemeProvider
 import HomeScreen from './src/screens/HomeScreen';
 import SearchScreen from './src/screens/SearchScreen';
 import BookmarksScreen from './src/screens/BookmarksScreen';
@@ -22,6 +23,7 @@ const Tab = createBottomTabNavigator();
 
 export default function App() {
   return (
+    <ThemeProvider>
     <QueryClientProvider client={queryClient}>
       <NavigationContainer>
         {/* Navigasi Tab Bawah Sementara */}
@@ -43,5 +45,6 @@ export default function App() {
         </Tab.Navigator>
       </NavigationContainer>
     </QueryClientProvider>
+    </ThemeProvider>
   );
 }

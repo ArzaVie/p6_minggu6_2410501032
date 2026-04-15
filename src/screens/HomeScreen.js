@@ -1,10 +1,13 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { SafeAreaView, FlatList, ActivityIndicator, Text, View, StyleSheet, RefreshControl } from 'react-native';
-import * as WebBrowser from 'expo-web-browser'; // Untuk membuka link berita
+import * as WebBrowser from 'expo-web-browser'; 
 import { useNews } from '../hooks/useNews';
 import { useBookmarks } from '../hooks/useBookmarks';
 import NewsCard from '../components/NewsCard';
 import CategoryFilter from '../components/CategoryFilter';
+
+// 1. Import useTheme
+import { useTheme } from '../Context/ThemeContext'; 
 
 // Daftar Kategori sesuai modul
 const CATEGORIES = [
@@ -16,71 +19,74 @@ const CATEGORIES = [
 ];
 
 export default function HomeScreen() {
-  const [category, setCategory] = useState('general'); // State untuk kategori aktif
-  const { bookmarks, toggleBookmark } = useBookmarks(); // Mengambil fungsi bookmark
+  const [category, setCategory] = useState('general'); 
+  const { bookmarks, toggleBookmark } = useBookmarks(); 
   
-  // Mengambil data dari React Query
+  // 2. Panggil palet warnanya
+  const { colors } = useTheme(); 
+  
   const {
     data, isLoading, isError, error,
     refetch, fetchNextPage, hasNextPage, isFetchingNextPage,
   } = useNews(category);
 
-  // Menggabungkan semua halaman artikel dari infinite scroll menjadi satu array
   const articles = useMemo(() => {
     return data?.pages.flatMap(p => p.articles) || [];
   }, [data]);
 
-  // Fungsi untuk merender setiap kartu berita
   const renderItem = useCallback(({ item }) => (
     <NewsCard
       article={item}
-      onPress={() => WebBrowser.openBrowserAsync(item.url)} // Buka artikel di browser internal
+      onPress={() => WebBrowser.openBrowserAsync(item.url)} 
       onBookmark={() => toggleBookmark(item)}
       isBookmarked={bookmarks.some(b => b.url === item.url)}
     />
   ), [bookmarks, toggleBookmark]);
 
-  // Tampilan saat pertama kali loading
   if (isLoading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#089182" />
-        <Text style={{ marginTop: 8 }}>Memuat berita...</Text>
+      // 3. Terapkan warna background dinamis
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        {/* 4. Ubah warna loading indicator jadi warna primary */}
+        <ActivityIndicator size="large" color={colors.primary} />
+        {/* 5. Terapkan warna teks dinamis */}
+        <Text style={{ marginTop: 8, color: colors.text }}>Memuat berita...</Text>
       </View>
     );
   }
 
-  // Tampilan saat error (misal koneksi putus atau API Key salah)
   if (isError) {
     return (
-      <View style={styles.center}>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
         <Text style={{ color: 'red', marginBottom: 8 }}>{error.message || 'Terjadi Kesalahan'}</Text>
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Komponen Filter Kategori */}
+    // 6. Terapkan warna background dinamis di kontainer utama
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <CategoryFilter
         categories={CATEGORIES}
         selected={category}
         onChange={setCategory}
       />
       
-      {/* Daftar Berita (FlatList) */}
       <FlatList
         data={articles}
         renderItem={renderItem}
-        keyExtractor={(item, index) => item.url + index} // Hindari error jika ada URL ganda
+        keyExtractor={(item, index) => item.url + index} 
         refreshControl={
-          <RefreshControl refreshing={isLoading} onRefresh={refetch} /> // Fitur Pull-to-refresh
+          <RefreshControl refreshing={isLoading} onRefresh={refetch} /> 
         }
         onEndReached={() => {
-          if (hasNextPage) fetchNextPage(); // Memuat halaman berikutnya saat scroll mentok
+          if (hasNextPage) fetchNextPage(); 
         }}
-        onEndReachedThreshold={0.3} // Panggil fetchNextPage saat sisa scroll 30%
-        ListFooterComponent={isFetchingNextPage ? <ActivityIndicator style={{ margin: 16 }} /> : null}
+        onEndReachedThreshold={0.3} 
+        ListFooterComponent={
+          // 7. Ubah warna loading bawah biar senada
+          isFetchingNextPage ? <ActivityIndicator style={{ margin: 16 }} color={colors.primary} /> : null
+        }
         contentContainerStyle={{ paddingBottom: 24 }}
       />
     </SafeAreaView>
@@ -90,8 +96,8 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
-    paddingTop: 16, // Jarak dari atas layar
+    // backgroundColor: '#F8FAFC', <--- HAPUS ini karena warnanya sudah diurus { backgroundColor: colors.background } di atas
+    paddingTop: 16, 
   },
   center: {
     flex: 1,
